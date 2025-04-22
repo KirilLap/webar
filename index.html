@@ -1,45 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <title>Babylon.js WebAR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+      background: black;
+      color: white;
+    }
+    #overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    #startButton {
+      padding: 1em 2em;
+      font-size: 1.2em;
+      background: #00aaff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+      margin-top: 20px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
 </head>
-<body style="margin: 0; overflow: hidden;">
+<body>
+  <div id="overlay">
+    <h1>Добро пожаловать в WebAR!</h1>
+    <p>Нажмите, чтобы начать и разрешить доступ к камере.</p>
+    <button id="startButton">Начать AR</button>
+  </div>
   <canvas id="renderCanvas"></canvas>
 
   <script>
+    const startButton = document.getElementById("startButton");
+    const overlay = document.getElementById("overlay");
     const canvas = document.getElementById("renderCanvas");
     const engine = new BABYLON.Engine(canvas, true);
 
-    const createScene = async function () {
+    async function createScene() {
       const scene = new BABYLON.Scene(engine);
-      const camera = new BABYLON.WebXRCamera("xrCamera", scene);
 
-      const xrHelper = await scene.createDefaultXRExperienceAsync({
+      const xr = await scene.createDefaultXRExperienceAsync({
         uiOptions: {
-          sessionMode: "immersive-ar", // "immersive-vr" for VR
+          sessionMode: "immersive-ar",
           referenceSpaceType: "local-floor"
         },
         optionalFeatures: true
       });
 
-      // Создание простой 3D модели
+      // Добавим простой объект в сцену
       const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 0.2 }, scene);
-      sphere.position.y = 0.2;
+      sphere.position = new BABYLON.Vector3(0, 0.2, 0);
 
-      // Свет
       const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 
-      return scene;
-    };
-
-    createScene().then(scene => {
+      // Запускаем рендер
       engine.runRenderLoop(() => scene.render());
+    }
+
+    startButton.addEventListener("click", async () => {
+      overlay.style.display = "none";
+      try {
+        await createScene();
+      } catch (err) {
+        alert("Ошибка запуска AR: " + err.message);
+        console.error(err);
+      }
     });
 
-    window.addEventListener("resize", () => engine.resize());
+    window.addEventListener("resize", () => {
+      engine.resize();
+    });
   </script>
 </body>
 </html>
