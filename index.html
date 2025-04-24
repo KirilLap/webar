@@ -1,142 +1,93 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <title>Babylon.js WebAR</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      font-family: sans-serif;
-      background: black;
-    }
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-    #overlay, #hint {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-    #overlay {
-      background: rgba(0, 0, 0, 0.8);
-    }
-    #startButton {
-      padding: 1em 2em;
-      font-size: 1.2em;
-      background: #00aaff;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      color: white;
-      margin-top: 20px;
-    }
-    #hint {
-      display: none;
-      background: transparent;
-      color: white;
-      font-size: 1.2em;
-      z-index: 5;
-      pointer-events: none;
-      animation: fadeIn 2s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-  </style>
-</head>
-<body>
-  <div id="overlay">
-    <h1>Добро пожаловать в WebAR!</h1>
-    <p>Нажмите, чтобы начать и разрешить доступ к камере.</p>
-    <button id="startButton">Начать AR</button>
-  </div>
-
-  <div id="hint">🔍 Наведите камеру на маркер</div>
-
-  <canvas id="renderCanvas"></canvas>
-
-  <script>
-    const startButton = document.getElementById("startButton");
-    const overlay = document.getElementById("overlay");
-    const hint = document.getElementById("hint");
-    const canvas = document.getElementById("renderCanvas");
-    const engine = new BABYLON.Engine(canvas, true);
-
-    async function createScene() {
-      const scene = new BABYLON.Scene(engine);
-
-      // Свет
-      const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-
-      // Объект
-      const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 0.2 }, scene);
-      sphere.position = new BABYLON.Vector3(0, 0.2, 0);
-
-      // Создание XR окружения
-      const xrHelper = await scene.createDefaultXRExperienceAsync({
-        uiOptions: {
-          sessionMode: "immersive-ar",
-          referenceSpaceType: "local-floor"
-        },
-        optionalFeatures: true
-      });
-
-      // Запуск AR-сессии вручную
-      await xrHelper.baseExperience.enterXRAsync(
-        "immersive-ar",
-        "local-floor",
-        {
-          optionalFeatures: ["hit-test", "dom-overlay"],
-          domOverlay: { root: document.body }
-        }
-      );
-
-      // Показываем подсказку
-      hint.style.display = "flex";
-
-      engine.runRenderLoop(() => {
-        scene.render();
-      });
-    }
-
-    startButton.addEventListener("click", async () => {
-      overlay.style.display = "none";
-
-      if (navigator.xr) {
-        const supported = await navigator.xr.isSessionSupported("immersive-ar");
-        if (!supported) {
-          alert("AR не поддерживается на этом устройстве/браузере.");
-          return;
-        }
-      } else {
-        alert("WebXR не поддерживается в этом браузере.");
-        return;
+<html>
+  <head>
+    <title>Sapiens AR</title>
+    <meta charset="UTF-8" />
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <style>
+      #info-box {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+        width: 300px;
+        display: none;
+        font-family: sans-serif;
       }
 
-      try {
-        await createScene();
-      } catch (e) {
-        console.error(e);
-        alert("Ошибка запуска AR: " + e.message);
+      #info-box h2 {
+        margin: 0 0 10px;
       }
-    });
 
-    window.addEventListener("resize", () => {
-      engine.resize();
-    });
-  </script>
-</body>
+      #info-box p {
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      #info-box button {
+        margin-top: 15px;
+        padding: 10px 15px;
+        background: #d62f2f;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      #info-box button:hover {
+        background: #a92121;
+      }
+    </style>
+  </head>
+
+  <body style="margin: 0; overflow: hidden;">
+    <div id="info-box">
+      <h2>Sapiens: A Brief History of Humankind</h2>
+      <p>
+        Yuval Noah Harari's bestselling book explores the history of the human race — from the emergence of Homo sapiens in Africa to the rise of modern civilizations.
+        Engaging and thought-provoking, *Sapiens* challenges everything we thought we knew about being human.
+      </p>
+      <a href="sapiens.pdf" download>
+        <button>Скачать PDF</button>
+      </a>
+    </div>
+
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+    >
+      <a-nft
+        type="nft"
+        url="image/Sapiens"
+        smooth="true"
+        smoothCount="10"
+        smoothTolerance="0.01"
+        smoothThreshold="5"
+        emitevents="true"
+      >
+        <a-box position="0 0.5 0" color="#FF5733" opacity="0.5"></a-box>
+      </a-nft>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+      const nft = document.querySelector('a-nft');
+      const infoBox = document.getElementById('info-box');
+
+      nft.addEventListener('markerFound', () => {
+        infoBox.style.display = 'block';
+      });
+
+      nft.addEventListener('markerLost', () => {
+        infoBox.style.display = 'none';
+      });
+    </script>
+  </body>
 </html>
