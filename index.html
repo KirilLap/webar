@@ -3,8 +3,10 @@
   <head>
     <title>Sapiens AR</title>
     <meta charset="UTF-8" />
+    <!-- Подключаем A-Frame -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <!-- Подключаем AR.js через надёжный CDN -->
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar-nft.js"></script>
     <style>
       #info-box {
         position: absolute;
@@ -17,6 +19,7 @@
         width: 300px;
         display: none;
         font-family: sans-serif;
+        z-index: 10;
       }
 
       #info-box h2 {
@@ -46,22 +49,25 @@
   </head>
 
   <body style="margin: 0; overflow: hidden;">
+    <!-- Информация о книге -->
     <div id="info-box">
-      <h2>Sapiens: A Brief History of Humankind</h2>
+      <h2>Sapiens: Краткая история человечества</h2>
       <p>
-        Yuval Noah Harari's bestselling book explores the history of the human race — from the emergence of Homo sapiens in Africa to the rise of modern civilizations.
-        Engaging and thought-provoking, *Sapiens* challenges everything we thought we knew about being human.
+        Бестселлер Юваля Ноя Харари — это глубокое и захватывающее путешествие по истории человечества от первых Homo sapiens до современного мира. 
+        Исследуется, как мы эволюционировали, построили цивилизации и создали современное общество.
       </p>
       <a href="sapiens.pdf" download>
-        <button>Скачать PDF</button>
+        <button>📥 Скачать PDF</button>
       </a>
     </div>
 
+    <!-- AR-сцена -->
     <a-scene
       vr-mode-ui="enabled: false"
       embedded
       arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
     >
+      <!-- NFT-маркер -->
       <a-nft
         type="nft"
         url="image/Sapiens"
@@ -71,12 +77,14 @@
         smoothThreshold="5"
         emitevents="true"
       >
+        <!-- Визуальный индикатор -->
         <a-box position="0 0.5 0" color="#FF5733" opacity="0.5"></a-box>
       </a-nft>
 
       <a-entity camera></a-entity>
     </a-scene>
 
+    <!-- Показываем/скрываем инфоблок -->
     <script>
       const nft = document.querySelector('a-nft');
       const infoBox = document.getElementById('info-box');
