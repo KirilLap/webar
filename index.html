@@ -3,11 +3,17 @@
   <head>
     <title>Sapiens AR</title>
     <meta charset="UTF-8" />
-    <!-- Подключаем A-Frame -->
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <!-- Подключаем AR.js через надёжный CDN -->
+    <!-- Стабильное подключение A-Frame -->
+    <script src="https://cdn.jsdelivr.net/npm/aframe@1.3.0/dist/aframe.min.js"></script>
+    <!-- AR.js для A-Frame -->
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar-nft.js"></script>
     <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+
       #info-box {
         position: absolute;
         bottom: 20px;
@@ -18,12 +24,12 @@
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
         width: 300px;
         display: none;
-        font-family: sans-serif;
         z-index: 10;
       }
 
       #info-box h2 {
         margin: 0 0 10px;
+        font-size: 18px;
       }
 
       #info-box p {
@@ -48,8 +54,8 @@
     </style>
   </head>
 
-  <body style="margin: 0; overflow: hidden;">
-    <!-- Информация о книге -->
+  <body>
+    <!-- Инфоблок -->
     <div id="info-box">
       <h2>Sapiens: Краткая история человечества</h2>
       <p>
@@ -61,7 +67,7 @@
       </a>
     </div>
 
-    <!-- AR-сцена -->
+    <!-- AR.js сцена -->
     <a-scene
       vr-mode-ui="enabled: false"
       embedded
@@ -77,24 +83,23 @@
         smoothThreshold="5"
         emitevents="true"
       >
-        <!-- Визуальный индикатор -->
         <a-box position="0 0.5 0" color="#FF5733" opacity="0.5"></a-box>
       </a-nft>
 
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- Показываем/скрываем инфоблок -->
+    <!-- Обработка событий -->
     <script>
-      const nft = document.querySelector('a-nft');
-      const infoBox = document.getElementById('info-box');
+      const marker = document.querySelector("a-nft");
+      const infoBox = document.getElementById("info-box");
 
-      nft.addEventListener('markerFound', () => {
-        infoBox.style.display = 'block';
+      marker.addEventListener("markerFound", () => {
+        infoBox.style.display = "block";
       });
 
-      nft.addEventListener('markerLost', () => {
-        infoBox.style.display = 'none';
+      marker.addEventListener("markerLost", () => {
+        infoBox.style.display = "none";
       });
     </script>
   </body>
