@@ -1,106 +1,314 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Sapiens AR</title>
-    <meta charset="UTF-8" />
-    <!-- Стабильное подключение A-Frame -->
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.3.0/dist/aframe.min.js"></script>
-    <!-- AR.js для A-Frame -->
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar-nft.js"></script>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Библиотечная AR выставка книг</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.4.0/aframe-ar.min.js"></script>
     <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-        font-family: sans-serif;
-      }
-
-      #info-box {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
-        width: 300px;
-        display: none;
-        z-index: 10;
-      }
-
-      #info-box h2 {
-        margin: 0 0 10px;
-        font-size: 18px;
-      }
-
-      #info-box p {
-        font-size: 14px;
-        line-height: 1.4;
-      }
-
-      #info-box button {
-        margin-top: 15px;
-        padding: 10px 15px;
-        background: #d62f2f;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-
-      #info-box button:hover {
-        background: #a92121;
-      }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background-color: #f5f5f5;
+        }
+        
+        .ui-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .splash-screen h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .splash-screen p {
+            margin-bottom: 30px;
+            font-size: 16px;
+            max-width: 600px;
+        }
+        
+        .start-button {
+            padding: 15px 30px;
+            background-color: #2c6fad;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        .book-info {
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .book-info.active {
+            max-height: 200px;
+            margin-bottom: 10px;
+        }
+        
+        .book-info h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+        
+        .book-info p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+        
+        .detail-button {
+            background-color: #2c6fad;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .book-details {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 500;
+            padding: 20px;
+            box-sizing: border-box;
+            display: none;
+            overflow-y: auto;
+        }
+        
+        .book-details.active {
+            display: block;
+        }
+        
+        .book-details h1 {
+            margin-top: 10px;
+            font-size: 24px;
+        }
+        
+        .book-details .description {
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        
+        .book-details img {
+            width: 120px;
+            height: auto;
+            float: left;
+            margin-right: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .read-button, .back-button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .read-button {
+            background-color: #2c6fad;
+            color: white;
+        }
+        
+        .back-button {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .scan-instruction {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            z-index: 200;
+        }
     </style>
-  </head>
-
-  <body>
-    <!-- Инфоблок -->
-    <div id="info-box">
-      <h2>Sapiens: Краткая история человечества</h2>
-      <p>
-        Бестселлер Юваля Ноя Харари — это глубокое и захватывающее путешествие по истории человечества от первых Homo sapiens до современного мира. 
-        Исследуется, как мы эволюционировали, построили цивилизации и создали современное общество.
-      </p>
-      <a href="sapiens.pdf" download>
-        <button>📥 Скачать PDF</button>
-      </a>
+</head>
+<body>
+    <!-- Стартовый экран -->
+    <div class="splash-screen" id="splash">
+        <h1>Добро пожаловать в AR выставку книг</h1>
+        <p>Направьте камеру на обложку книги, чтобы увидеть подробную информацию о ней. Для лучшего опыта используйте хорошее освещение.</p>
+        <button class="start-button" id="startButton">Начать просмотр</button>
+    </div>
+    
+    <!-- A-Frame и AR.js сцена -->
+    <a-scene embedded arjs="detectionMode: mono_and_matrix; matrixCodeType: 3x3;" vr-mode-ui="enabled: false">
+        <!-- Маркеры для разных книг -->
+        <a-marker type="pattern" url="data/pattern-book1.patt" id="book1-marker">
+            <a-box position="0 0.5 0" color="red" opacity="0.5"></a-box>
+        </a-marker>
+        
+        <a-marker type="pattern" url="data/pattern-book2.patt" id="book2-marker">
+            <a-box position="0 0.5 0" color="blue" opacity="0.5"></a-box>
+        </a-marker>
+        
+        <a-marker type="pattern" url="data/pattern-book3.patt" id="book3-marker">
+            <a-box position="0 0.5 0" color="green" opacity="0.5"></a-box>
+        </a-marker>
+        
+        <!-- Камера -->
+        <a-entity camera></a-entity>
+    </a-scene>
+    
+    <!-- Инструкция по сканированию -->
+    <div class="scan-instruction" id="scanInstruction" style="display: none;">
+        Наведите камеру на обложку книги
+    </div>
+    
+    <!-- Контейнер для информации о книге -->
+    <div class="ui-container">
+        <div class="book-info" id="bookInfo">
+            <h2 id="bookTitle"></h2>
+            <p id="bookAuthor"></p>
+            <button class="detail-button" id="detailButton">Подробнее</button>
+        </div>
+    </div>
+    
+    <!-- Экран с подробной информацией о книге -->
+    <div class="book-details" id="bookDetails">
+        <img id="bookCover" src="/api/placeholder/200/300" alt="Обложка книги">
+        <h1 id="detailTitle"></h1>
+        <p id="detailAuthor"></p>
+        <div class="description" id="detailDescription"></div>
+        <div>
+            <button class="read-button" id="readButton">Читать</button>
+            <button class="back-button" id="backButton">Назад</button>
+        </div>
     </div>
 
-    <!-- AR.js сцена -->
-    <a-scene
-      vr-mode-ui="enabled: false"
-      embedded
-      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-    >
-      <!-- NFT-маркер -->
-      <a-nft
-        type="nft"
-        url="image/Sapiens"
-        smooth="true"
-        smoothCount="10"
-        smoothTolerance="0.01"
-        smoothThreshold="5"
-        emitevents="true"
-      >
-        <a-box position="0 0.5 0" color="#FF5733" opacity="0.5"></a-box>
-      </a-nft>
-
-      <a-entity camera></a-entity>
-    </a-scene>
-
-    <!-- Обработка событий -->
     <script>
-      const marker = document.querySelector("a-nft");
-      const infoBox = document.getElementById("info-box");
-
-      marker.addEventListener("markerFound", () => {
-        infoBox.style.display = "block";
-      });
-
-      marker.addEventListener("markerLost", () => {
-        infoBox.style.display = "none";
-      });
+        // База данных книг (в реальном проекте это может быть загружено с сервера)
+        const booksDatabase = {
+            'book1': {
+                title: 'Война и мир',
+                author: 'Лев Толстой',
+                description: 'Роман-эпопея Льва Николаевича Толстого, описывающий русское общество в эпоху войн против Наполеона в 1805—1812 годах. Эпилог романа доводит повествование до 1820 года. Одно из крупнейших произведений мировой литературы.',
+                coverImage: '/api/placeholder/200/300'
+            },
+            'book2': {
+                title: 'Мастер и Маргарита',
+                author: 'Михаил Булгаков',
+                description: 'Роман Михаила Афанасьевича Булгакова, работа над которым началась в конце 1920-х годов и продолжалась вплоть до смерти писателя. Роман отличается сложной композицией, в нём есть несколько сюжетных линий, охватывающих библейские времена и Москву 1930-х годов.',
+                coverImage: '/api/placeholder/200/300'
+            },
+            'book3': {
+                title: 'Преступление и наказание',
+                author: 'Фёдор Достоевский',
+                description: 'Социально-психологический и социально-философский роман Фёдора Михайловича Достоевского, над которым писатель работал в 1865—1866 годах. Через историю главного героя автор показывает, что преступление против нравственности ведёт к душевным мукам.',
+                coverImage: '/api/placeholder/200/300'
+            }
+        };
+        
+        // Элементы DOM
+        const splash = document.getElementById('splash');
+        const startButton = document.getElementById('startButton');
+        const scanInstruction = document.getElementById('scanInstruction');
+        const bookInfo = document.getElementById('bookInfo');
+        const bookTitle = document.getElementById('bookTitle');
+        const bookAuthor = document.getElementById('bookAuthor');
+        const detailButton = document.getElementById('detailButton');
+        const bookDetails = document.getElementById('bookDetails');
+        const bookCover = document.getElementById('bookCover');
+        const detailTitle = document.getElementById('detailTitle');
+        const detailAuthor = document.getElementById('detailAuthor');
+        const detailDescription = document.getElementById('detailDescription');
+        const readButton = document.getElementById('readButton');
+        const backButton = document.getElementById('backButton');
+        
+        // Текущая книга
+        let currentBook = null;
+        
+        // Обработчик для стартового экрана
+        startButton.addEventListener('click', () => {
+            splash.style.display = 'none';
+            scanInstruction.style.display = 'block';
+        });
+        
+        // Обработчик для кнопки "Подробнее"
+        detailButton.addEventListener('click', () => {
+            if (currentBook) {
+                const book = booksDatabase[currentBook];
+                bookCover.src = book.coverImage;
+                detailTitle.textContent = book.title;
+                detailAuthor.textContent = book.author;
+                detailDescription.textContent = book.description;
+                bookDetails.classList.add('active');
+            }
+        });
+        
+        // Обработчик для кнопки "Назад"
+        backButton.addEventListener('click', () => {
+            bookDetails.classList.remove('active');
+        });
+        
+        // Обработчик для кнопки "Читать"
+        readButton.addEventListener('click', () => {
+            alert('Функция чтения будет доступна в полной версии приложения');
+        });
+        
+        // Обработчики событий для маркеров AR
+        const markers = document.querySelectorAll('a-marker');
+        
+        markers.forEach(marker => {
+            marker.addEventListener('markerFound', () => {
+                const bookId = marker.id.split('-')[0];
+                currentBook = bookId;
+                
+                const book = booksDatabase[bookId];
+                bookTitle.textContent = book.title;
+                bookAuthor.textContent = book.author;
+                
+                bookInfo.classList.add('active');
+                scanInstruction.style.display = 'none';
+            });
+            
+            marker.addEventListener('markerLost', () => {
+                bookInfo.classList.remove('active');
+                scanInstruction.style.display = 'block';
+                currentBook = null;
+            });
+        });
     </script>
-  </body>
+</body>
 </html>
